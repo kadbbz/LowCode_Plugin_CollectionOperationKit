@@ -10,7 +10,7 @@ using System.Reflection;
 
 namespace CollectionOperationKit
 {
-    [Icon("pack://application:,,,/CollectionOperationKit;component/Resources/Icon.png")]
+    [Icon("pack://application:,,,/CollectionOperationKit;component/Resources/ObjectIcon.png")]
     public class ServerSideObjectOp : Command, ICommandExecutableInServerSide
     {
 

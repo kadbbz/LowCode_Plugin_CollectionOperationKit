@@ -7,7 +7,7 @@ using System.ComponentModel;
 
 namespace CollectionOperationKit
 {
-    [Icon("pack://application:,,,/CollectionOperationKit;component/Resources/Icon.png")]
+    [Icon("pack://application:,,,/CollectionOperationKit;component/Resources/ArrayIcon.png")]
     public class ClientSideArrayOp : Command 
     {
 

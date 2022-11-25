@@ -90,7 +90,13 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Resources\Icon.png" />
+    <Resource Include="Resources\ArrayIcon.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\ObjectIcon.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\DictIcon.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

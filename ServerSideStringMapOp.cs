@@ -9,7 +9,7 @@ using System.ComponentModel;
 
 namespace CollectionOperationKit
 {
-    [Icon("pack://application:,,,/CollectionOperationKit;component/Resources/Icon.png")]
+    [Icon("pack://application:,,,/CollectionOperationKit;component/Resources/DictIcon.png")]
     public class ServerSideStringMapOp : Command, ICommandExecutableInServerSide
     {
 
