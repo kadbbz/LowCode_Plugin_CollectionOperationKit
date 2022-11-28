@@ -10,6 +10,7 @@ using System.ComponentModel;
 namespace CollectionOperationKit
 {
     [Icon("pack://application:,,,/CollectionOperationKit;component/Resources/ArrayIcon.png")]
+    [Category("对象与集合操作")]
     public class ServerSideArrayOp : Command, ICommandExecutableInServerSide
     {
 

@@ -11,6 +11,7 @@ using System.Reflection;
 namespace CollectionOperationKit
 {
     [Icon("pack://application:,,,/CollectionOperationKit;component/Resources/ObjectIcon.png")]
+    [Category("对象与集合操作")]
     public class ServerSideObjectOp : Command, ICommandExecutableInServerSide
     {
 

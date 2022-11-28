@@ -10,6 +10,7 @@ using System.ComponentModel;
 namespace CollectionOperationKit
 {
     [Icon("pack://application:,,,/CollectionOperationKit;component/Resources/ObjectIcon.png")]
+    [Category("对象与集合操作")]
     public class ClientSideObjectOp : Command
     {
 
