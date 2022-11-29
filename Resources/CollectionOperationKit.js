@@ -288,7 +288,7 @@ var ClientSideStringMapOp = (function (_super) {
         if (OutParamaterName && OutParamaterName != "") {
             Forguncy.CommandHelper.setVariableValue(OutParamaterName, data);
         } else {
-            this.log("OutParamaterName was not set, the value is: " + JSON.stringify(data));
+            this.log("The OutParamaterName was not set, the value is: " + JSON.stringify(data));
         }
     };
 

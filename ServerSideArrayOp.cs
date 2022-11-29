@@ -6,12 +6,13 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Linq;
 
 namespace CollectionOperationKit
 {
     [Icon("pack://application:,,,/CollectionOperationKit;component/Resources/ArrayIcon.png")]
     [Category("对象与集合操作")]
-    public class ServerSideArrayOp : Command, ICommandExecutableInServerSide
+    public class ServerSideArrayOp : BaseServerCommand, ICommandExecutableInServerSide
     {
 
         /// <summary>
@@ -47,45 +48,39 @@ namespace CollectionOperationKit
 
         }
 
-        /// <summary>
-        /// 插件类型：设置为服务端命令插件
-        /// </summary>
-        /// <returns>插件类型枚举</returns>
-        public override CommandScope GetCommandScope()
-        {
-            return CommandScope.ServerSide;
-        }
-
         private ArrayList getArrayListParam(IServerCommandExecuteContext dataContext, object formula)
         {
-
-            var input = getParamValue(dataContext, formula);
-
-            // 输入参数仅支持ArrayList
-            if (input.GetType() != typeof(ArrayList))
+            if (formula == null)
             {
-                throw new ArgumentException("[" + formula + "]'s type was " + input.GetType().ToString() + ", should be an ArrayList. Array can be converted using [FormArray] operation.");
+                throw new ArgumentException("The argument/formula was not set.");
             }
 
-            return (ArrayList)input;
+            var rawData = getParamValue(dataContext, formula);
 
-        }
-
-        private object getParamValue(IServerCommandExecuteContext dataContext, object formula)
-        {
-            var task = dataContext.EvaluateFormulaAsync(formula);
-            task.Wait();
-            return task.Result;
-        }
-
-
-        private void returnToParam(IServerCommandExecuteContext dataContext, object data)
-        {
-            // 只有设置了返回参数，才能执行参数写入，避免出错
-            if (!string.IsNullOrEmpty(OutParamaterName))
+            ArrayList data = new ArrayList();
+            if (rawData == null)
             {
-                dataContext.Parameters[OutParamaterName] = data;
+                throw new ArgumentException("[" + formula.ToString() + "] is null.");
             }
+            if (rawData.GetType() == typeof(ArrayList))
+            {
+                data = (ArrayList)rawData;
+            }
+            else if (rawData.GetType() == typeof(Array))
+            {
+                data.AddRange((Array)rawData);
+            }
+            else if (rawData.GetType() == typeof(JArray))
+            {
+                data.AddRange(((JArray)rawData).ToArray());
+            }
+            else
+            {
+                throw new ArgumentException("[" + formula.ToString() + "]'s type was " + rawData.GetType().ToString() + ", should be an ArrayList， Array or JArray.");
+            }
+
+            return data;
+
         }
 
         public ExecuteResult Execute(IServerCommandExecuteContext dataContext)
@@ -102,9 +97,14 @@ namespace CollectionOperationKit
                             {
                                 al.AddRange((Array)rawData);
                             }
+                            else if (rawData.GetType() == typeof(JArray))
+                            {
+                                al.AddRange(((JArray)rawData).ToArray());
+                            }
                             else
                             {
-                                al.Add(rawData);
+                                throw new ArgumentException("[" + this.OperationParamaterAName + "]'s type was " + rawData.GetType().ToString() + ", should be an Array or JArray.");
+
                             }
                         }
 
@@ -114,7 +114,7 @@ namespace CollectionOperationKit
                     }
                 case SupportedOperations.ToArray:
                     {
-                        ArrayList data = getArrayListParam(dataContext, this.InParamaterName);
+                        ArrayList data = getArrayListParam(dataContext, this.InParamater);
 
                         returnToParam(dataContext, data.ToArray());
                         break;
@@ -126,7 +126,7 @@ namespace CollectionOperationKit
                     }
                 case SupportedOperations.Set:
                     {
-                        ArrayList data = getArrayListParam(dataContext, this.InParamaterName);
+                        ArrayList data = getArrayListParam(dataContext, this.InParamater);
                         int index = int.Parse(getParamValue(dataContext, this.OperationParamaterAName).ToString());
                         data[index] = getParamValue(dataContext, this.OperationParamaterBName);
                         returnToParam(dataContext, data);
@@ -134,7 +134,7 @@ namespace CollectionOperationKit
                     }
                 case SupportedOperations.Get:
                     {
-                        ArrayList data = getArrayListParam(dataContext, this.InParamaterName);
+                        ArrayList data = getArrayListParam(dataContext, this.InParamater);
                         int index = int.Parse(getParamValue(dataContext, this.OperationParamaterAName).ToString());
 
                         returnToParam(dataContext, data[index]);
@@ -143,20 +143,20 @@ namespace CollectionOperationKit
                 case SupportedOperations.Length:
                     {
 
-                        ArrayList data = getArrayListParam(dataContext, this.InParamaterName);
+                        ArrayList data = getArrayListParam(dataContext, this.InParamater);
                         returnToParam(dataContext, data.Count);
                         break;
                     }
                 case SupportedOperations.Push:
                     {
-                        ArrayList data = getArrayListParam(dataContext, this.InParamaterName);
+                        ArrayList data = getArrayListParam(dataContext, this.InParamater);
                         data.Add(getParamValue(dataContext, this.OperationParamaterAName));
                         returnToParam(dataContext, data);
                         break;
                     }
                 case SupportedOperations.Pop:
                     {
-                        ArrayList data = getArrayListParam(dataContext, this.InParamaterName);
+                        ArrayList data = getArrayListParam(dataContext, this.InParamater);
                         var last = data[data.Count - 1];
                         data.RemoveAt(data.Count - 1);
                         returnToParam(dataContext, last);
@@ -164,14 +164,14 @@ namespace CollectionOperationKit
                     }
                 case SupportedOperations.Unshift:
                     {
-                        ArrayList data = getArrayListParam(dataContext, this.InParamaterName);
+                        ArrayList data = getArrayListParam(dataContext, this.InParamater);
                         data.Insert(0, getParamValue(dataContext, this.OperationParamaterAName));
                         returnToParam(dataContext, data);
                         break;
                     }
                 case SupportedOperations.Shift:
                     {
-                        ArrayList data = getArrayListParam(dataContext, this.InParamaterName);
+                        ArrayList data = getArrayListParam(dataContext, this.InParamater);
                         var first = data[0];
                         data.RemoveAt(0);
                         returnToParam(dataContext, first);
@@ -179,7 +179,7 @@ namespace CollectionOperationKit
                     }
                 case SupportedOperations.Concat:
                     {
-                        ArrayList data = getArrayListParam(dataContext, this.InParamaterName);
+                        ArrayList data = getArrayListParam(dataContext, this.InParamater);
                         ArrayList subData = getArrayListParam(dataContext, this.OperationParamaterAName);
                         var result = (ArrayList)data.Clone(); // 行为与JS Array的conact行为一致，不能影响原有数组
                         result.AddRange(subData);
@@ -188,7 +188,7 @@ namespace CollectionOperationKit
                     }
                 case SupportedOperations.Slice:
                     {
-                        ArrayList data = getArrayListParam(dataContext, this.InParamaterName);
+                        ArrayList data = getArrayListParam(dataContext, this.InParamater);
                         int start = int.Parse(getParamValue(dataContext, this.OperationParamaterAName).ToString());
                         int end = int.Parse(getParamValue(dataContext, this.OperationParamaterBName).ToString());
                         returnToParam(dataContext, data.GetRange(start, end - start));
@@ -196,7 +196,7 @@ namespace CollectionOperationKit
                     }
                 case SupportedOperations.InsertRange:
                     {
-                        ArrayList data = getArrayListParam(dataContext, this.InParamaterName);
+                        ArrayList data = getArrayListParam(dataContext, this.InParamater);
                         ArrayList subData = getArrayListParam(dataContext, this.OperationParamaterAName);
                         int index = int.Parse(getParamValue(dataContext, this.OperationParamaterBName).ToString());
                         data.InsertRange(index, subData);
@@ -205,7 +205,7 @@ namespace CollectionOperationKit
                     }
                 case SupportedOperations.RemoveRange:
                     {
-                        ArrayList data = getArrayListParam(dataContext, this.InParamaterName);
+                        ArrayList data = getArrayListParam(dataContext, this.InParamater);
                         int index = int.Parse(getParamValue(dataContext, this.OperationParamaterBName).ToString());
                         int count = int.Parse(getParamValue(dataContext, this.OperationParamaterAName).ToString());
 
@@ -217,14 +217,14 @@ namespace CollectionOperationKit
                     }
                 case SupportedOperations.IndexOf:
                     {
-                        ArrayList data = getArrayListParam(dataContext, this.InParamaterName);
+                        ArrayList data = getArrayListParam(dataContext, this.InParamater);
                         int index = data.IndexOf(getParamValue(dataContext, this.OperationParamaterAName));
                         returnToParam(dataContext, index);
                         break;
                     }
                 case SupportedOperations.LastIndexOf:
                     {
-                        ArrayList data = getArrayListParam(dataContext, this.InParamaterName);
+                        ArrayList data = getArrayListParam(dataContext, this.InParamater);
                         int index = data.LastIndexOf(getParamValue(dataContext, this.OperationParamaterAName));
                         returnToParam(dataContext, index);
                         break;
@@ -239,26 +239,120 @@ namespace CollectionOperationKit
 
         }
 
+
+        [OrderWeight(1)]
         [DisplayName("操作")]
         [ComboProperty]
         [SearchableProperty]
         public SupportedOperations Operation { get; set; }
 
-        [DisplayName("输入参数")]
-        [FormulaProperty]
-        public object InParamaterName { get; set; }
+        private bool setPropertyVisiblity(string propertyName, bool In, bool A, bool B)
+        {
 
+            if (propertyName == nameof(InParamater))
+            {
+                return In;
+            }
+            else if (propertyName == nameof(OperationParamaterAName))
+            {
+                return A;
+            }
+            else if (propertyName == nameof(OperationParamaterBName))
+            {
+                return B;
+            }
+            else
+            {
+                return true; // 输出参数为常驻显示
+            }
+        }
+
+        public override bool GetDesignerPropertyVisible(string propertyName, CommandScope commandScope)
+        {
+            switch (this.Operation)
+            {
+
+                case SupportedOperations.Concat:
+                    {
+                        return setPropertyVisiblity(propertyName, true, true, false);
+                    }
+                case SupportedOperations.Create:
+                    {
+                        return setPropertyVisiblity(propertyName, false, false, false);
+                    }
+                case SupportedOperations.FromArray:
+                    {
+                        return setPropertyVisiblity(propertyName, false, true, false);
+                    }
+                case SupportedOperations.Get:
+                    {
+                        return setPropertyVisiblity(propertyName, true, true, false);
+                    }
+                case SupportedOperations.IndexOf:
+                    {
+                        return setPropertyVisiblity(propertyName, true, true, false);
+                    }
+                case SupportedOperations.InsertRange:
+                    {
+                        return setPropertyVisiblity(propertyName, true, true, true);
+                    }
+                case SupportedOperations.LastIndexOf:
+                    {
+                        return setPropertyVisiblity(propertyName, true, true, false);
+                    }
+                case SupportedOperations.Length:
+                    {
+                        return setPropertyVisiblity(propertyName, true, false, false);
+                    }
+                case SupportedOperations.Pop:
+                    {
+                        return setPropertyVisiblity(propertyName, true, false, false);
+                    }
+                case SupportedOperations.Push:
+                    {
+                        return setPropertyVisiblity(propertyName, true, true, false);
+                    }
+                case SupportedOperations.RemoveRange:
+                    {
+                        return setPropertyVisiblity(propertyName, true, true, true);
+                    }
+                case SupportedOperations.Set:
+                    {
+                        return setPropertyVisiblity(propertyName, true, true, true);
+                    }
+                case SupportedOperations.Shift:
+                    {
+                        return setPropertyVisiblity(propertyName, true, false, false);
+                    }
+                case SupportedOperations.Slice:
+                    {
+                        return setPropertyVisiblity(propertyName, true, true, true);
+                    }
+                case SupportedOperations.ToArray:
+                    {
+                        return setPropertyVisiblity(propertyName, true, false, false);
+                    }
+                case SupportedOperations.Unshift:
+                    {
+                        return setPropertyVisiblity(propertyName, true, true, false);
+                    }
+                default:
+                    {
+                        return base.GetDesignerPropertyVisible(propertyName, commandScope);
+                    }
+            }
+
+        }
+
+        [OrderWeight(101)]
         [DisplayName("操作参数A")]
         [FormulaProperty]
         public object OperationParamaterAName { get; set; }
 
+        [OrderWeight(102)]
         [DisplayName("操作参数B")]
         [FormulaProperty]
         public object OperationParamaterBName { get; set; }
-
-        [DisplayName("将结果返回到变量")]
-        [ResultToProperty]
-        public String OutParamaterName { get; set; }
 
 
         public enum SupportedOperations

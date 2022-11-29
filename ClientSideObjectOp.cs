@@ -56,6 +56,58 @@ namespace CollectionOperationKit
             return CommandScope.ClientSide;
         }
 
+        private bool setPropertyVisiblity(string propertyName, bool In, bool N, bool V)
+        {
+
+            if (propertyName == nameof(InParamater))
+            {
+                return In;
+            }
+            else if (propertyName == nameof(OperationParamaterName))
+            {
+                return N;
+            }
+            else if (propertyName == nameof(OperationParamaterValue))
+            {
+                return V;
+            }
+            else
+            {
+                return true; // 输出参数为常驻显示
+            }
+        }
+
+        public override bool GetDesignerPropertyVisible(string propertyName, CommandScope commandScope)
+        {
+            switch (this.Operation)
+            {
+                case SupportedOperations.Create:
+                    {
+                        return setPropertyVisiblity(propertyName, false, false, false);
+                    }
+                case SupportedOperations.GetPropertyValue:
+                    {
+                        return setPropertyVisiblity(propertyName, true, true, true);
+                    }
+                case SupportedOperations.Null:
+                    {
+                        return setPropertyVisiblity(propertyName, false, false, false);
+                    }
+                case SupportedOperations.Properties:
+                    {
+                        return setPropertyVisiblity(propertyName, true, false, false);
+                    }
+                case SupportedOperations.SetPropertyValue:
+                    {
+                        return setPropertyVisiblity(propertyName, true, true, true);
+                    }
+                default:
+                    {
+                        return base.GetDesignerPropertyVisible(propertyName, commandScope);
+                    }
+            }
+
+        }
 
         [DisplayName("操作")]
         [ComboProperty]

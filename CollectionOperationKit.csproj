@@ -61,6 +61,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BaseServerCommand.cs" />
     <Compile Include="ClientSideArrayOp.cs" />
     <Compile Include="ClientSideObjectOp.cs" />
     <Compile Include="ClientSideStringMapOp.cs" />

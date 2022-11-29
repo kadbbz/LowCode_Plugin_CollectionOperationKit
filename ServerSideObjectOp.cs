@@ -12,7 +12,7 @@ namespace CollectionOperationKit
 {
     [Icon("pack://application:,,,/CollectionOperationKit;component/Resources/ObjectIcon.png")]
     [Category("对象与集合操作")]
-    public class ServerSideObjectOp : Command, ICommandExecutableInServerSide
+    public class ServerSideObjectOp : BaseServerCommand, ICommandExecutableInServerSide
     {
 
         /// <summary>
@@ -46,31 +46,6 @@ namespace CollectionOperationKit
 
             }
 
-        }
-
-        /// <summary>
-        /// 插件类型：设置为服务端命令插件
-        /// </summary>
-        /// <returns>插件类型枚举</returns>
-        public override CommandScope GetCommandScope()
-        {
-            return CommandScope.ServerSide;
-        }
-
-        private object getParamValue(IServerCommandExecuteContext dataContext, object formula)
-        {
-            var task = dataContext.EvaluateFormulaAsync(formula);
-            task.Wait();
-            return task.Result;
-        }
-
-        private void returnToParam(IServerCommandExecuteContext dataContext, object data)
-        {
-            // 只有设置了返回参数，才能执行参数写入，避免出错
-            if (!string.IsNullOrEmpty(OutParamaterName))
-            {
-                dataContext.Parameters[OutParamaterName] = data;
-            }
         }
 
         public ExecuteResult Execute(IServerCommandExecuteContext dataContext)
@@ -108,7 +83,7 @@ namespace CollectionOperationKit
                         else
                         {
                             // 系统内置的，仅获取公有的实例属性，避免后面设置属性时出错
-                            var props = input.GetType().GetProperties(System.Reflection.BindingFlags.Public|System.Reflection.BindingFlags.Instance);
+                            var props = input.GetType().GetProperties(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance);
 
                             List<string> propl = new List<string>();
 
@@ -127,7 +102,12 @@ namespace CollectionOperationKit
 
                         var input = getParamValue(dataContext, this.InParamater);
                         var name = getParamValue(dataContext, this.OperationParamaterName).ToString();
-                        var value = getParamValue(dataContext, this.OperationParamaterValue);
+                        
+                        object value = null;
+                        if (this.OperationParamaterValue != null)
+                        {
+                            value = getParamValue(dataContext, this.OperationParamaterValue);
+                        }
 
                         if (input is IDictionary<string, object> dic)
                         {
@@ -174,7 +154,11 @@ namespace CollectionOperationKit
 
                         var input = getParamValue(dataContext, this.InParamater);
                         var name = getParamValue(dataContext, this.OperationParamaterName).ToString();
-                        var value = getParamValue(dataContext, this.OperationParamaterValue);
+                        object value = null;
+                        if (this.OperationParamaterValue != null)
+                        {
+                            value = getParamValue(dataContext, this.OperationParamaterValue);
+                        }
 
                         if (input is IDictionary<string, object> dic)
                         {
@@ -223,8 +207,6 @@ namespace CollectionOperationKit
                             returnToParam(dataContext, input);
                         }
 
-
-
                         break;
                     }
                 case SupportedOperations.Null:
@@ -244,27 +226,74 @@ namespace CollectionOperationKit
 
         }
 
+        private bool setPropertyVisiblity(string propertyName, bool In, bool N, bool V)
+        {
+
+            if (propertyName == nameof(InParamater))
+            {
+                return In;
+            }
+            else if (propertyName == nameof(OperationParamaterName))
+            {
+                return N;
+            }
+            else if (propertyName == nameof(OperationParamaterValue))
+            {
+                return V;
+            }
+            else
+            {
+                return true; // 输出参数为常驻显示
+            }
+        }
+
+        public override bool GetDesignerPropertyVisible(string propertyName, CommandScope commandScope)
+        {
+            switch (this.Operation)
+            {
+                case SupportedOperations.Create:
+                    {
+                        return setPropertyVisiblity(propertyName, false, false, false);
+                    }
+                case SupportedOperations.GetPropertyValue:
+                    {
+                        return setPropertyVisiblity(propertyName, true, true, true);
+                    }
+                case SupportedOperations.Null:
+                    {
+                        return setPropertyVisiblity(propertyName, false, false, false);
+                    }
+                case SupportedOperations.Properties:
+                    {
+                        return setPropertyVisiblity(propertyName, true, false, false);
+                    }
+                case SupportedOperations.SetPropertyValue:
+                    {
+                        return setPropertyVisiblity(propertyName, true, true, true);
+                    }
+                default:
+                    {
+                        return base.GetDesignerPropertyVisible(propertyName, commandScope);
+                    }
+            }
+
+        }
+
+        [OrderWeight(1)]
         [DisplayName("操作")]
         [ComboProperty]
         [SearchableProperty]
         public SupportedOperations Operation { get; set; }
 
-        [DisplayName("输入参数")]
-        [FormulaProperty]
-        public object InParamater { get; set; }
-
+        [OrderWeight(101)]
         [DisplayName("属性名")]
         [FormulaProperty]
         public object OperationParamaterName { get; set; }
 
+        [OrderWeight(102)]
         [DisplayName("属性值")]
         [FormulaProperty]
         public object OperationParamaterValue { get; set; }
-
-        [DisplayName("将结果返回到变量")]
-        [ResultToProperty]
-        public String OutParamaterName { get; set; }
-
 
         public enum SupportedOperations
         {

@@ -74,6 +74,103 @@ namespace CollectionOperationKit
         [ResultToProperty]
         public String OutParamaterName { get; set; }
 
+        private bool setPropertyVisiblity(string propertyName, bool In, bool A, bool B)
+        {
+
+            if (propertyName == nameof(InParamaterName))
+            {
+                return In;
+            }
+            else if (propertyName == nameof(OperationParamaterAName))
+            {
+                return A;
+            }
+            else if (propertyName == nameof(OperationParamaterBName))
+            {
+                return B;
+            }
+            else
+            {
+                return true; // 输出参数为常驻显示
+            }
+        }
+
+        public override bool GetDesignerPropertyVisible(string propertyName, CommandScope commandScope)
+        {
+            switch (this.Operation)
+            {
+
+                case SupportedOperations.Concat:
+                    {
+                        return setPropertyVisiblity(propertyName, true, true, false);
+                    }
+                case SupportedOperations.Create:
+                    {
+                        return setPropertyVisiblity(propertyName, false, false, false);
+                    }
+                case SupportedOperations.FromJSON:
+                    {
+                        return setPropertyVisiblity(propertyName, false, true, false);
+                    }
+                case SupportedOperations.Get:
+                    {
+                        return setPropertyVisiblity(propertyName, true, true, false);
+                    }
+                case SupportedOperations.IndexOf:
+                    {
+                        return setPropertyVisiblity(propertyName, true, true, false);
+                    }
+                case SupportedOperations.InsertRange:
+                    {
+                        return setPropertyVisiblity(propertyName, true, true, true);
+                    }
+                case SupportedOperations.LastIndexOf:
+                    {
+                        return setPropertyVisiblity(propertyName, true, true, false);
+                    }
+                case SupportedOperations.Length:
+                    {
+                        return setPropertyVisiblity(propertyName, true, false, false);
+                    }
+                case SupportedOperations.Pop:
+                    {
+                        return setPropertyVisiblity(propertyName, true, false, false);
+                    }
+                case SupportedOperations.Push:
+                    {
+                        return setPropertyVisiblity(propertyName, true, true, false);
+                    }
+                case SupportedOperations.RemoveRange:
+                    {
+                        return setPropertyVisiblity(propertyName, true, true, true);
+                    }
+                case SupportedOperations.Set:
+                    {
+                        return setPropertyVisiblity(propertyName, true, true, true);
+                    }
+                case SupportedOperations.Shift:
+                    {
+                        return setPropertyVisiblity(propertyName, true, false, false);
+                    }
+                case SupportedOperations.Slice:
+                    {
+                        return setPropertyVisiblity(propertyName, true, true, true);
+                    }
+                case SupportedOperations.ToJSON:
+                    {
+                        return setPropertyVisiblity(propertyName, true, false, false);
+                    }
+                case SupportedOperations.Unshift:
+                    {
+                        return setPropertyVisiblity(propertyName, true, true, false);
+                    }
+                default:
+                    {
+                        return base.GetDesignerPropertyVisible(propertyName, commandScope);
+                    }
+            }
+
+        }
 
         public enum SupportedOperations
         {

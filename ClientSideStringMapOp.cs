@@ -78,6 +78,75 @@ namespace CollectionOperationKit
         [ResultToProperty]
         public String OutParamaterName { get; set; }
 
+        private bool setPropertyVisiblity(string propertyName, bool In, bool K, bool V)
+        {
+
+            if (propertyName == nameof(InParamater))
+            {
+                return In;
+            }
+            else if (propertyName == nameof(OperationParamaterKey))
+            {
+                return K;
+            }
+            else if (propertyName == nameof(OperationParamaterValue))
+            {
+                return V;
+            }
+            else
+            {
+                return true; // 输出参数为常驻显示
+            }
+        }
+
+        public override bool GetDesignerPropertyVisible(string propertyName, CommandScope commandScope)
+        {
+            switch (this.Operation)
+            {
+                case SupportedOperations.Clear:
+                    {
+                        return setPropertyVisiblity(propertyName, true, false, false);
+                    }
+                case SupportedOperations.Create:
+                    {
+                        return setPropertyVisiblity(propertyName, false, false, false);
+                    }
+                case SupportedOperations.Delete:
+                    {
+                        return setPropertyVisiblity(propertyName, true, true, false);
+                    }
+                case SupportedOperations.Get:
+                    {
+                        return setPropertyVisiblity(propertyName, true, true, false);
+                    }
+                case SupportedOperations.Has:
+                    {
+                        return setPropertyVisiblity(propertyName, true, true, false);
+                    }
+                case SupportedOperations.Keys:
+                    {
+                        return setPropertyVisiblity(propertyName, true, false, false);
+                    }
+                case SupportedOperations.Set:
+                    {
+                        return setPropertyVisiblity(propertyName, true, true, true);
+                    }
+                case SupportedOperations.Size:
+                    {
+                        return setPropertyVisiblity(propertyName, true, false, false);
+                    }
+                case SupportedOperations.Values:
+                    {
+                        return setPropertyVisiblity(propertyName, true, false, false);
+                    }
+                default:
+                    {
+                        return base.GetDesignerPropertyVisible(propertyName, commandScope);
+                    }
+            }
+
+        }
+
         public enum SupportedOperations
         {
             [Description("创建一个空的字典")]

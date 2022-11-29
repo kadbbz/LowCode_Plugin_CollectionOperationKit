@@ -11,7 +11,7 @@ namespace CollectionOperationKit
 {
     [Icon("pack://application:,,,/CollectionOperationKit;component/Resources/DictIcon.png")]
     [Category("对象与集合操作")]
-    public class ServerSideStringMapOp : Command, ICommandExecutableInServerSide
+    public class ServerSideStringMapOp : BaseServerCommand, ICommandExecutableInServerSide
     {
 
         /// <summary>
@@ -47,14 +47,6 @@ namespace CollectionOperationKit
 
         }
 
-        /// <summary>
-        /// 插件类型：设置为服务端命令插件
-        /// </summary>
-        /// <returns>插件类型枚举</returns>
-        public override CommandScope GetCommandScope()
-        {
-            return CommandScope.ServerSide;
-        }
 
         private Dictionary<string, object> getDictionaryParam(IServerCommandExecuteContext dataContext, object formula)
         {
@@ -68,23 +60,6 @@ namespace CollectionOperationKit
 
             return (Dictionary<string, object>)input;
 
-        }
-
-        private object getParamValue(IServerCommandExecuteContext dataContext, object formula)
-        {
-
-            var task = dataContext.EvaluateFormulaAsync(formula);
-            task.Wait();
-            return task.Result;
-        }
-
-        private void returnToParam(IServerCommandExecuteContext dataContext, object data)
-        {
-
-            if (!string.IsNullOrEmpty(OutParamaterName))
-            {
-                dataContext.Parameters[OutParamaterName] = data;
-            }
         }
 
         public ExecuteResult Execute(IServerCommandExecuteContext dataContext)
@@ -202,27 +177,90 @@ namespace CollectionOperationKit
 
         }
 
+        [OrderWeight(1)]
         [DisplayName("操作")]
         [ComboProperty]
         [SearchableProperty]
         public SupportedOperations Operation { get; set; }
 
-        [DisplayName("输入参数")]
-        [FormulaProperty]
-        public object InParamater { get; set; }
-
+        [OrderWeight(101)]
         [DisplayName("键（文本型）")]
         [FormulaProperty]
         public object OperationParamaterKey { get; set; }
 
+        [OrderWeight(102)]
         [DisplayName("值")]
         [FormulaProperty]
         public object OperationParamaterValue { get; set; }
 
-        [DisplayName("将结果返回到变量")]
-        [ResultToProperty]
-        public String OutParamaterName { get; set; }
+        private bool setPropertyVisiblity(string propertyName, bool In, bool K, bool V)
+        {
 
+            if (propertyName == nameof(InParamater))
+            {
+                return In;
+            }
+            else if (propertyName == nameof(OperationParamaterKey))
+            {
+                return K;
+            }
+            else if (propertyName == nameof(OperationParamaterValue))
+            {
+                return V;
+            }
+            else
+            {
+                return true; // 输出参数为常驻显示
+            }
+        }
+
+        public override bool GetDesignerPropertyVisible(string propertyName, CommandScope commandScope)
+        {
+            switch (this.Operation)
+            {
+                case SupportedOperations.Clear:
+                    {
+                        return setPropertyVisiblity(propertyName, true, false, false);
+                    }
+                case SupportedOperations.Create:
+                    {
+                        return setPropertyVisiblity(propertyName, false, false, false);
+                    }
+                case SupportedOperations.Delete:
+                    {
+                        return setPropertyVisiblity(propertyName, true, true, false);
+                    }
+                case SupportedOperations.Get:
+                    {
+                        return setPropertyVisiblity(propertyName, true, true, false);
+                    }
+                case SupportedOperations.Has:
+                    {
+                        return setPropertyVisiblity(propertyName, true, true, false);
+                    }
+                case SupportedOperations.Keys:
+                    {
+                        return setPropertyVisiblity(propertyName, true, false, false);
+                    }
+                case SupportedOperations.Set:
+                    {
+                        return setPropertyVisiblity(propertyName, true, true, true);
+                    }
+                case SupportedOperations.Size:
+                    {
+                        return setPropertyVisiblity(propertyName, true, false, false);
+                    }
+                case SupportedOperations.Values:
+                    {
+                        return setPropertyVisiblity(propertyName, true, false, false);
+                    }
+                default:
+                    {
+                        return base.GetDesignerPropertyVisible(propertyName, commandScope);
+                    }
+            }
+
+        }
 
         public enum SupportedOperations
         {
