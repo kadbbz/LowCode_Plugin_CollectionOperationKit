@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace CollectionOperationKit
 {
-    public abstract class BaseServerCommand:Command
+    public abstract class BaseServerCommand : Command
     {
         [OrderWeight(10)]
         [DisplayName("输入参数")]
@@ -33,7 +33,7 @@ namespace CollectionOperationKit
         }
 
 
-        protected object getParamValue(IServerCommandExecuteContext dataContext, object formula)
+        protected object getParamValue(IServerCommandExecuteContext dataContext, object formula, bool shouldCheckNull = true)
         {
             if (formula == null)
             {
@@ -43,7 +43,7 @@ namespace CollectionOperationKit
             var task = dataContext.EvaluateFormulaAsync(formula);
             task.Wait();
 
-            if (task.Result == null)
+            if (task.Result == null && shouldCheckNull)
             {
                 throw new ArgumentException("[" + formula.ToString() + "] is null.");
             }

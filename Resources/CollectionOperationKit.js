@@ -421,6 +421,7 @@ var ClientSideObjectOp = (function (_super) {
     ClientSideObjectOp.prototype.execute = function () {
         var params = this.CommandParam;
         var Operation = params.Operation;
+        var PropPairs = params.OperationParamaterPairs;
         var inP = this.evaluateFormula(params.InParamater);
         var pName = this.evaluateFormula(params.OperationParamaterName);
         var pValue = this.evaluateFormula(params.OperationParamaterValue);
@@ -483,6 +484,29 @@ var ClientSideObjectOp = (function (_super) {
                 this.returnToParam(OutParamaterName, inP);
                 break;
             }
+            case SupportedOperations.SetProperties: {
+                if (!inP instanceof Object) {
+                    this.log("Paramater [" + params.InParamater + "] should be an Object.");
+                    return;
+                }
+
+                if (!PropPairs ||  !PropPairs instanceof Array) {
+                    this.log("Paramater [OperationParamaterPairs] was not set.");
+                    return;
+                }
+
+                var me = this;
+
+                PropPairs.forEach(function (v) {
+                    var pNameP = me.evaluateFormula(v.Name);
+                    var pValueP = me.evaluateFormula(v.Value);
+
+                    inP[pNameP] = pValueP;
+                });
+
+                this.returnToParam(OutParamaterName, inP);
+                break;
+            }
         }
 
     };
@@ -492,7 +516,8 @@ var ClientSideObjectOp = (function (_super) {
         Properties: 1,
         GetPropertyValue: 2,
         SetPropertyValue: 3,
-        Null: 4
+        SetProperties: 4,
+        Null: 5
     }
 
     return ClientSideObjectOp;

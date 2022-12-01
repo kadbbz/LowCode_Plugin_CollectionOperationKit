@@ -101,8 +101,8 @@ namespace CollectionOperationKit
                     {
 
                         var input = getParamValue(dataContext, this.InParamater);
-                        var name = getParamValue(dataContext, this.OperationParamaterName).ToString();
-                        
+                        var name = getParamValue(dataContext, this.OperationParamaterName, false).ToString();
+
                         object value = null;
                         if (this.OperationParamaterValue != null)
                         {
@@ -152,59 +152,43 @@ namespace CollectionOperationKit
                 case SupportedOperations.SetPropertyValue:
                     {
 
-                        var input = getParamValue(dataContext, this.InParamater);
+                        var input = getParamValue(dataContext, this.InParamater, true);
                         var name = getParamValue(dataContext, this.OperationParamaterName).ToString();
                         object value = null;
-                        if (this.OperationParamaterValue != null)
+                        if (this.OperationParamaterValue != null) // 不设置该属性时，等同于直接置空
                         {
-                            value = getParamValue(dataContext, this.OperationParamaterValue);
+                            value = getParamValue(dataContext, this.OperationParamaterValue, false);
                         }
 
-                        if (input is IDictionary<string, object> dic)
+                        returnToParam(dataContext, setObjectProperty(input, name, value));
+
+                        break;
+                    }
+                case SupportedOperations.SetProperties:
+                    {
+
+                        var input = getParamValue(dataContext, this.InParamater, true);
+
+                        if (this.OperationParamaterPairs == null)
                         {
-                            // 使用命令创建的，直接写入
-                            if (dic.ContainsKey(name))
-                            {
-                                dic[name] = value;
-                            }
-                            else
-                            {
-                                dic.Add(name, value);
-                            }
-
-                            returnToParam(dataContext, input);
-
-                        }
-                        else if (input is JObject jObj)
-                        {
-                            // 从JSON反序列化回来的，先转成和使用命令创建的一样的类型
-                            var inputObj = jObj.ToDictionary();
-
-                            if (inputObj.ContainsKey(name))
-                            {
-                                inputObj[name] = value;
-                            }
-                            else
-                            {
-                                inputObj.Add(name, value);
-                            }
-
-                            returnToParam(dataContext, inputObj);
+                            throw new ArgumentNullException(nameof(OperationParamaterPairs));
                         }
                         else
                         {
-                            // 内置类型不支持增加属性，但可以尝试写入
-                            var prop = input.GetType().GetProperty(name);
-                            if (prop == null)
+                            foreach (PropertyValueObject pair in this.OperationParamaterPairs)
                             {
-                                throw new NotSupportedException("AppendProperty is NOT supported for the [" + InParamater + "], it's neither a Dictionary<string,object> created by Huozige command or a JObject deserialized from JSON.");
-                            }
-                            else
-                            {
-                                prop.SetValue(input, value);
+                                if (pair.Value == null) // 不设置该属性时，等同于直接置空
+                                {
+                                    input = setObjectProperty(input, getParamValue(dataContext, pair.Name).ToString(), null);
+                                }
+                                else
+                                {
+                                    input = setObjectProperty(input, getParamValue(dataContext, pair.Name).ToString(), getParamValue(dataContext, pair.Value, false));
+                                }
                             }
 
                             returnToParam(dataContext, input);
+
                         }
 
                         break;
@@ -226,7 +210,57 @@ namespace CollectionOperationKit
 
         }
 
-        private bool setPropertyVisiblity(string propertyName, bool In, bool N, bool V)
+        private object setObjectProperty(object input, string name, object value)
+        {
+            if (input is IDictionary<string, object> dic)
+            {
+                // 使用命令创建的，直接写入
+                if (dic.ContainsKey(name))
+                {
+                    dic[name] = value;
+                }
+                else
+                {
+                    dic.Add(name, value);
+                }
+
+                return input;
+            }
+            else if (input is JObject jObj)
+            {
+                // 从JSON反序列化回来的，先转成和使用命令创建的一样的类型
+                var inputObj = jObj.ToDictionary();
+
+                if (inputObj.ContainsKey(name))
+                {
+                    inputObj[name] = value;
+                }
+                else
+                {
+                    inputObj.Add(name, value);
+                }
+
+                return inputObj;
+            }
+            else
+            {
+                // 内置类型不支持增加属性，但可以尝试写入
+                var prop = input.GetType().GetProperty(name);
+                if (prop == null)
+                {
+                    throw new NotSupportedException("AppendProperty is NOT supported for the [" + InParamater + "], it's neither a Dictionary<string,object> created by Huozige command or a JObject deserialized from JSON.");
+                }
+                else
+                {
+                    prop.SetValue(input, value);
+                }
+
+                return input;
+            }
+
+        }
+
+        private bool setPropertyVisiblity(string propertyName, bool In, bool N, bool V, bool M = false)
         {
 
             if (propertyName == nameof(InParamater))
@@ -240,6 +274,10 @@ namespace CollectionOperationKit
             else if (propertyName == nameof(OperationParamaterValue))
             {
                 return V;
+            }
+            else if (propertyName == nameof(OperationParamaterPairs))
+            {
+                return M;
             }
             else
             {
@@ -271,6 +309,10 @@ namespace CollectionOperationKit
                     {
                         return setPropertyVisiblity(propertyName, true, true, true);
                     }
+                case SupportedOperations.SetProperties:
+                    {
+                        return setPropertyVisiblity(propertyName, true, false, false, true);
+                    }
                 default:
                     {
                         return base.GetDesignerPropertyVisible(propertyName, commandScope);
@@ -295,6 +337,11 @@ namespace CollectionOperationKit
         [FormulaProperty]
         public object OperationParamaterValue { get; set; }
 
+        [OrderWeight(103)]
+        [DisplayName("点击批量设置多个属性")]
+        [ListProperty]
+        public List<PropertyValueObject> OperationParamaterPairs { get; set; }
+
         public enum SupportedOperations
         {
             [Description("创建一个新对象")]
@@ -305,6 +352,8 @@ namespace CollectionOperationKit
             GetPropertyValue,
             [Description("SetPropertyValue：将【输入参数】中名为【属性名】的属性值设置为【属性值】并返回")]
             SetPropertyValue,
+            [Description("SetProperties：批量设置【输入参数】的多个属性，并返回")]
+            SetProperties,
             [Description("Null：返回%Null%")]
             Null
         }

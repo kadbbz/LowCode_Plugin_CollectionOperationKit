@@ -56,7 +56,8 @@ namespace CollectionOperationKit
             return CommandScope.ClientSide;
         }
 
-        private bool setPropertyVisiblity(string propertyName, bool In, bool N, bool V)
+
+        private bool setPropertyVisiblity(string propertyName, bool In, bool N, bool V, bool M = false)
         {
 
             if (propertyName == nameof(InParamater))
@@ -70,6 +71,10 @@ namespace CollectionOperationKit
             else if (propertyName == nameof(OperationParamaterValue))
             {
                 return V;
+            }
+            else if (propertyName == nameof(OperationParamaterPairs))
+            {
+                return M;
             }
             else
             {
@@ -101,6 +106,10 @@ namespace CollectionOperationKit
                     {
                         return setPropertyVisiblity(propertyName, true, true, true);
                     }
+                case SupportedOperations.SetProperties:
+                    {
+                        return setPropertyVisiblity(propertyName, true, false, false, true);
+                    }
                 default:
                     {
                         return base.GetDesignerPropertyVisible(propertyName, commandScope);
@@ -109,23 +118,33 @@ namespace CollectionOperationKit
 
         }
 
+        [OrderWeight(10)]
         [DisplayName("操作")]
         [ComboProperty]
         [SearchableProperty]
         public SupportedOperations Operation { get; set; }
 
+        [OrderWeight(100)]
         [DisplayName("输入参数")]
         [FormulaProperty]
         public object InParamater { get; set; }
 
+        [OrderWeight(101)]
         [DisplayName("属性名")]
         [FormulaProperty]
         public object OperationParamaterName { get; set; }
 
+        [OrderWeight(102)]
         [DisplayName("属性值")]
         [FormulaProperty]
         public object OperationParamaterValue { get; set; }
 
+        [OrderWeight(103)]
+        [DisplayName("点击批量设置多个属性")]
+        [ListProperty]
+        public List<PropertyValueObject> OperationParamaterPairs { get; set; }
+
+        [OrderWeight(999)]
         [DisplayName("将结果返回到变量")]
         [ResultToProperty]
         public String OutParamaterName { get; set; }
@@ -140,6 +159,8 @@ namespace CollectionOperationKit
             GetPropertyValue,
             [Description("SetPropertyValue：将【输入参数】中名为【属性名】的属性值设置为【属性值】并返回")]
             SetPropertyValue,
+            [Description("SetProperties：批量设置【输入参数】的多个属性，并返回")]
+            SetProperties,
             [Description("Null：返回%Null%")]
             Null
         }

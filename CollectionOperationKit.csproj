@@ -66,6 +66,7 @@
     <Compile Include="ClientSideObjectOp.cs" />
     <Compile Include="ClientSideStringMapOp.cs" />
     <Compile Include="JObjectExtensions.cs" />
+    <Compile Include="PropertyValueObject.cs" />
     <Compile Include="ServerSideObjectOp.cs" />
     <Compile Include="ServerSideStringMapOp.cs" />
     <Compile Include="ServerSideArrayOp.cs" />
