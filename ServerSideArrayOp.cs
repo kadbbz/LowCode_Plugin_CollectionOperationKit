@@ -29,7 +29,7 @@ namespace CollectionOperationKit
                 }
                 else
                 {
-                    return "创建数组： " + OutParamaterName;
+                    return "创建数组：" + OutParamaterName;
                 }
 
             }
@@ -41,7 +41,7 @@ namespace CollectionOperationKit
                 }
                 else
                 {
-                    return "数组操作（" + Operation.ToString() + "）： " + OutParamaterName;
+                    return "数组操作（" + Operation.ToString() + "）：" + OutParamaterName;
                 }
 
             }
@@ -239,6 +239,11 @@ namespace CollectionOperationKit
 
         }
 
+        [OrderWeight(10)]
+        [DisplayName("数组（输入参数）")]
+        [FormulaProperty]
+        [Description("操作可能不会影响【输入参数】中用到的变量，如需对变量进行修改，可将其填写到【将结果返回到变量】。")]
+        public object InParamater { get; set; }
 
         [OrderWeight(1)]
         [DisplayName("操作")]

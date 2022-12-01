@@ -29,7 +29,7 @@ namespace CollectionOperationKit
                 }
                 else
                 {
-                    return "创建对象： " + OutParamaterName;
+                    return "创建对象：" + OutParamaterName;
                 }
 
             }
@@ -41,7 +41,7 @@ namespace CollectionOperationKit
                 }
                 else
                 {
-                    return "对象操作（" + Operation.ToString() + "）： " + OutParamaterName;
+                    return "对象操作（" + Operation.ToString() + "）：" + OutParamaterName;
                 }
 
             }
@@ -55,7 +55,28 @@ namespace CollectionOperationKit
 
                 case SupportedOperations.Create:
                     {
-                        returnToParam(dataContext, new Dictionary<string, object>());
+                        var input = new Dictionary<string, object>();
+
+                        if (this.OperationParamaterPairs != null)
+                        {
+                            foreach (PropertyValueObject pair in this.OperationParamaterPairs)
+                            {
+                                string key = getParamValue(dataContext, pair.Name).ToString();
+
+                                if (!input.ContainsKey(key))
+                                {
+                                    input.Add(key, null);
+                                }
+
+                                if (pair.Value != null)
+                                {
+                                    input.Add(key, getParamValue(dataContext, pair.Value, false));
+                                }
+                            }
+
+                            returnToParam(dataContext, input);
+
+                        }
                         break;
                     }
                 case SupportedOperations.Properties:
@@ -291,7 +312,7 @@ namespace CollectionOperationKit
             {
                 case SupportedOperations.Create:
                     {
-                        return setPropertyVisiblity(propertyName, false, false, false);
+                        return setPropertyVisiblity(propertyName, false, false, false, true);
                     }
                 case SupportedOperations.GetPropertyValue:
                     {
@@ -327,6 +348,12 @@ namespace CollectionOperationKit
         [SearchableProperty]
         public SupportedOperations Operation { get; set; }
 
+        [OrderWeight(10)]
+        [DisplayName("对象（输入参数）")]
+        [FormulaProperty]
+        [Description("操作可能不会影响【输入参数】中用到的变量，如需对变量进行修改，可将其填写到【将结果返回到变量】。")]
+        public object InParamater { get; set; }
+
         [OrderWeight(101)]
         [DisplayName("属性名")]
         [FormulaProperty]
@@ -338,7 +365,7 @@ namespace CollectionOperationKit
         public object OperationParamaterValue { get; set; }
 
         [OrderWeight(103)]
-        [DisplayName("点击批量设置多个属性")]
+        [DisplayName("点击设置对象的属性")]
         [ListProperty]
         public List<PropertyValueObject> OperationParamaterPairs { get; set; }
 

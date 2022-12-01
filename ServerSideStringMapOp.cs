@@ -28,7 +28,7 @@ namespace CollectionOperationKit
                 }
                 else
                 {
-                    return "创建字典： " + OutParamaterName;
+                    return "创建字典：" + OutParamaterName;
                 }
 
             }
@@ -40,7 +40,7 @@ namespace CollectionOperationKit
                 }
                 else
                 {
-                    return "字典操作（" + Operation.ToString() + "）： " + OutParamaterName;
+                    return "字典操作（" + Operation.ToString() + "）：" + OutParamaterName;
                 }
 
             }
@@ -182,6 +182,11 @@ namespace CollectionOperationKit
         [ComboProperty]
         [SearchableProperty]
         public SupportedOperations Operation { get; set; }
+
+        [OrderWeight(10)]
+        [DisplayName("字典（输入参数）")]
+        [FormulaProperty]
+        public object InParamater { get; set; }
 
         [OrderWeight(101)]
         [DisplayName("键（文本型）")]

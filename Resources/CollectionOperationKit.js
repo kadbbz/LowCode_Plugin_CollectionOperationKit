@@ -429,7 +429,21 @@ var ClientSideObjectOp = (function (_super) {
 
         switch (Operation) {
             case SupportedOperations.Create: {
-                this.returnToParam(OutParamaterName, new Object());
+                var inP = new Object();
+
+                if (PropPairs && PropPairs instanceof Array) {
+                    var me = this;
+
+                    PropPairs.forEach(function (v) {
+                        var pNameP = me.evaluateFormula(v.Name);
+                        var pValueP = me.evaluateFormula(v.Value);
+
+                        inP[pNameP] = pValueP;
+                    });
+                }
+
+                this.returnToParam(OutParamaterName, inP);
+
                 break;
             }
             case SupportedOperations.Null: {

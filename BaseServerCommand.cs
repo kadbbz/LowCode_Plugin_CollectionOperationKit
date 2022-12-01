@@ -11,12 +11,6 @@ namespace CollectionOperationKit
 {
     public abstract class BaseServerCommand : Command
     {
-        [OrderWeight(10)]
-        [DisplayName("输入参数")]
-        [FormulaProperty]
-        [Description("操作可能不会影响【输入参数】中用到的变量，如需对变量进行修改，可将其填写到【将结果返回到变量】。")]
-        public object InParamater { get; set; }
-
         [OrderWeight(999)]
         [DisplayName("将结果返回到变量")]
         [ResultToProperty]

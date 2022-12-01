@@ -26,7 +26,7 @@ namespace CollectionOperationKit
                 }
                 else
                 {
-                    return "创建数组: " + OutParamaterName;
+                    return "创建数组：" + OutParamaterName;
                 }
 
             }
@@ -37,7 +37,7 @@ namespace CollectionOperationKit
                     return "数组操作（" + Operation.ToString() + "）" ;
                 }
                 else {
-                    return "数组操作（" + Operation.ToString() + "）: " + OutParamaterName;
+                    return "数组操作（" + Operation.ToString() + "）：" + OutParamaterName;
                 }
                 
             }
@@ -58,7 +58,7 @@ namespace CollectionOperationKit
         [SearchableProperty]
         public SupportedOperations Operation { get; set; }
 
-        [DisplayName("输入参数")]
+        [DisplayName("数组（输入参数）")]
         [FormulaProperty]
         public object InParamaterName { get; set; }
 
