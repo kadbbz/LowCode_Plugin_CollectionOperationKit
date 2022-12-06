@@ -102,6 +102,6 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>"$(ProjectDir)\Tools\PluginPackageTool.exe" "$(ProjectDir)\" "$(ConfigurationName)"</PostBuildEvent>
+    <PostBuildEvent>"E:\CODE\ForguncyPluginBuilder\bin\ForguncyPluginPackageTool.exe" "$(ProjectDir)\" "C:\Program Files\Forguncy 8"</PostBuildEvent>
   </PropertyGroup>
 </Project>

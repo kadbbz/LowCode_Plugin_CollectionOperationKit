@@ -11,6 +11,6 @@
   "name": "对象与集合操作工具",
   "pluginType": "command",
   "guid": "CDD2FBD5-794F-4C7F-A483-030352D73C3C",
-  "version": "2.2.0.0",
+  "version": "2.2.0.1",
   "dependenceVersion": "8.0.100.0"
 }

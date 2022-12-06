@@ -77,13 +77,15 @@ namespace CollectionOperationKit
                         var data = getDictionaryParam(dataContext, InParamater);
                         var key = getParamValue(dataContext, this.OperationParamaterKey).ToString();
 
+                        var value = (null == OperationParamaterValue) ? null : getParamValue(dataContext, this.OperationParamaterValue);
+
                         if (data.ContainsKey(key))
                         {
-                            data[key] = getParamValue(dataContext, this.OperationParamaterValue);
+                            data[key] = value;
                         }
                         else
                         {
-                            data.Add(key, getParamValue(dataContext, this.OperationParamaterValue));
+                            data.Add(key, value);
                         }
 
                         returnToParam(dataContext, data);

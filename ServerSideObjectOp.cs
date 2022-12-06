@@ -70,13 +70,13 @@ namespace CollectionOperationKit
 
                                 if (pair.Value != null)
                                 {
-                                    input.Add(key, getParamValue(dataContext, pair.Value, false));
+                                    input[key]= getParamValue(dataContext, pair.Value, false);
                                 }
                             }
-
-                            returnToParam(dataContext, input);
-
                         }
+
+                        returnToParam(dataContext, input);
+
                         break;
                     }
                 case SupportedOperations.Properties:

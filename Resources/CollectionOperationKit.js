@@ -228,7 +228,7 @@
 
                 this.returnToParam(OutParamaterName, index);
                 break;
-            } case SupportedOperations.FormJSON: {
+            } case SupportedOperations.FromJSON: {
                 var arr = JSON.parse(paramA);
                 if (arr && Array.isArray(arr)) {
                     this.returnToParam(OutParamaterName, arr);
